@@ -1,0 +1,15 @@
+[package]
+name = "waxy"
+version = "0.1.0"
+authors = ["Oliver Gould <ver@buoyant.io>"]
+edition = "2018"
+
+[dependencies]
+futures = "0.3"
+http = "0.2"
+hyper = "0.13"
+tokio = { version = "0.2", features = ["full"] }
+tower-service = "0.3"
+tracing = "0.1"
+#wasmer-runtime = "0.13.1"
+
