@@ -10,11 +10,11 @@ impl AdmitHeader {
     pub fn new(wasm: &[u8], header: String) -> wasm::error::Result<Self> {
         let import_object = wasm::imports! {};
         let instance = wasm::instantiate(&wasm, &import_object)?;
+        // Ensure that there's an admit function.
+        let _ = instance.func::<(WasmPtr<u8, wasm::Array>, u16), u8>("admit")?;
         let value_ptr = instance
-            .func::<(), WasmPtr<u8, wasm::Array>>("admit_ptr")
-            .expect("WASM does not implement `admit_ptr`")
-            .call()
-            .expect("`admit_ptr` panicked");
+            .func::<(), WasmPtr<u8, wasm::Array>>("admit_ptr")?
+            .call()?;
         Ok(Self {
             header,
             instance,
@@ -32,16 +32,14 @@ impl super::Admit for AdmitHeader {
         let sz = bytes.len();
         write_bytes_and_null(bytes, self.value_ptr, self.instance.context_mut().memory(0));
 
-        if let Ok(func) = self
+        let admit = self
             .instance
             .func::<(WasmPtr<u8, wasm::Array>, u16), u8>("admit")
-        {
-            if let Ok(1) = func.call(self.value_ptr, sz as u16) {
-                return true;
-            }
-        }
+            .expect("`admit` not supported")
+            .call(self.value_ptr, sz as u16)
+            .expect("`admit` panicked");
 
-        false
+        admit == 1
     }
 }
 

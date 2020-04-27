@@ -34,10 +34,13 @@ impl<A> Clone for AdmitProxy<A> {
     }
 }
 
-impl<A: Admit + Send + 'static> tower_service::Service<http::Request<hyper::Body>> for AdmitProxy<A> {
+impl<A: Admit + Send + 'static> tower_service::Service<http::Request<hyper::Body>>
+    for AdmitProxy<A>
+{
     type Response = http::Response<hyper::Body>;
     type Error = hyper::Error;
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send + 'static>>;
+    type Future =
+        Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send + 'static>>;
 
     fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), hyper::Error>> {
         self.client.poll_ready(cx)
